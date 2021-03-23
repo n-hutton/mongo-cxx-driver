@@ -35,12 +35,37 @@ which to use is entirely aesthetic.
 ## List builder {#list}
 
 The simplest way to create a BSON document or array is to use the JSON-like
-list builder: 
+list builder. The type must be specified for nested documents and arrays. 
 
 ```c++
-// { "hello": "world" }
-bsoncxx::builder::list list_builder = {"hello", "world"};
-bsoncxx::document::view document = list_builder.view().get_document();
+// { "books" : [ 
+//      { "title" : "The Great Gatsby", "author" : "Francis Scott Key Fitzgerald", "year" : 1925 }, 
+//      { "title" : "One Hundred Years of Solitude", "author" : "Gabriel García Márquez", "year" : 1967 } 
+// ] }
+using namespace builder;
+list::document the_great_gatsby = {{"title", "The Great Gatsby"}, 
+                                   {"author", "Francis Scott Key Fitzgerald"}, 
+                                   {"year", 1925}};
+
+list::document one_hundred_years_of_solitude = {{"title", "One Hundred Years of Solitude"},
+                                                {"author", "Gabriel García Márquez"},
+                                                {"year", 1967}};
+
+// You must call extract on all document and array builders before use, including nested ones. After extracting a BSON 
+// document or array from its corresponding builder, it is illegal to call any methods on that builder object.
+list::document books = {
+    "books",
+    list::array{
+        the_great_gatsby.extract(), 
+        one_hundred_years_of_solitude.extract()
+    }.extract()
+};
+
+// You can no longer use "the_great_gatsby" or "one_hundred_years_of_solitude" builders.  Alternatively, you could save 
+// the BSON document extract returns to a bsoncxx::document::value, similar to what's done below for "books.
+
+bsoncxx::document::value document = books.extract(); // We can't use "books" anymore, but "document" has no such 
+// restrictions. 
 ```
 
 More advanced uses of the list builder are shown in [this
