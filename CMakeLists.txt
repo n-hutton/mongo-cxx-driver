@@ -18,6 +18,12 @@ if(POLICY CMP0025)
   cmake_policy(SET CMP0025 NEW)
 endif()
 
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    message(STATUS "Found ccache")
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
+endif()
+
 project(MONGO_CXX_DRIVER LANGUAGES CXX)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
